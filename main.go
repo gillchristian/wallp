@@ -14,6 +14,11 @@ import (
 	"github.com/reujab/wallpaper"
 )
 
+type Args struct {
+	setLast bool
+	path    string
+}
+
 type File struct {
 	name    string
 	modTime time.Time
@@ -34,10 +39,10 @@ func (s FilesSlice) Less(i, j int) bool {
 }
 
 func main() {
-	wallsDir, setLastImg := parseArgs()
+	args := parseArgs()
 
 	var imgs FilesSlice
-	files, err := ioutil.ReadDir(wallsDir)
+	files, err := ioutil.ReadDir(args.path)
 
 	if err != nil {
 		log.Fatal(err)
@@ -49,10 +54,10 @@ func main() {
 
 	sort.Sort(imgs)
 
-	i := getImgIndex(len(imgs), setLastImg)
+	i := getImgIndex(len(imgs), args.setLast)
 	randImg := imgs[i].name
 
-	err = wallpaper.SetFromFile(wallsDir + randImg)
+	err = wallpaper.SetFromFile(args.path + randImg)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -60,11 +65,14 @@ func main() {
 	}
 }
 
-func parseArgs() (string, bool) {
+func parseArgs() Args {
 	useLastPtr := flag.Bool("l", false, "use last image instead of a random one")
 	flag.Parse()
 
-	return getImgsPath(), *useLastPtr
+	return Args{
+		setLast: *useLastPtr,
+		path:    getImgsPath(),
+	}
 }
 
 func getImgIndex(l int, shouldGetLastIndex bool) int {
