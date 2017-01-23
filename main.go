@@ -41,23 +41,17 @@ func (s FilesSlice) Less(i, j int) bool {
 func main() {
 	args := parseArgs()
 
-	var imgs FilesSlice
-	files, err := ioutil.ReadDir(args.path)
+	imgs, err := readDir(args.path)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, file := range files {
-		imgs = append(imgs, File{file.Name(), file.ModTime()})
-	}
-
-	sort.Sort(imgs)
-
 	i := getImgIndex(len(imgs), args.setLast)
 	randImg := imgs[i].name
 
 	err = wallpaper.SetFromFile(args.path + randImg)
+
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -114,4 +108,18 @@ func getHomeDir() string {
 		log.Fatal(err)
 	}
 	return usr.HomeDir
+}
+
+func readDir(path string) (FilesSlice, error) {
+	var imgs FilesSlice
+
+	files, err := ioutil.ReadDir(path)
+
+	for _, file := range files {
+		imgs = append(imgs, File{file.Name(), file.ModTime()})
+	}
+
+	sort.Sort(imgs)
+
+	return imgs, err
 }
