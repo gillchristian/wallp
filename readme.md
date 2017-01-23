@@ -1,6 +1,6 @@
 # wallp
 
-Change your wallpaper from the console.
+Change your wallpaper from the terminal.
 
 ## Install
 
@@ -21,4 +21,3 @@ $ wallp -l path/to/wallpapers/directory
 ```
 
 If you don't provide a directory it will default to `~/Pictures`.
-
