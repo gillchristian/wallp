@@ -14,7 +14,7 @@ $ go get github.com/gillchristian/wallp
 $ wallp path/to/wallpapers/directory
 ```
 
-Use `-l` to set the lattes modified image on the directory as the wallpaper, instead of a random one.
+Use `-l` to set the latest modified image on the directory as the wallpaper, instead of a random one.
 
 ```bash
 $ wallp -l path/to/wallpapers/directory
