@@ -44,7 +44,14 @@ func main() {
 	imgs, err := readDir(args.path)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(args.path + " does not exist or parmission is denied =/")
+		return
+	}
+
+	if len(imgs) == 0 {
+		fmt.Println("No images found on: " + args.path)
+		fmt.Println("¯\\_(ツ)_/¯")
+		return
 	}
 
 	i := getImgIndex(len(imgs), args.setLast)
@@ -114,6 +121,10 @@ func readDir(path string) (FilesSlice, error) {
 	var imgs FilesSlice
 
 	files, err := ioutil.ReadDir(path)
+
+	if err != nil {
+		return FilesSlice{}, err
+	}
 
 	for _, file := range files {
 		imgs = append(imgs, File{file.Name(), file.ModTime()})
