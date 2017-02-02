@@ -14,29 +14,17 @@ import (
 	"github.com/reujab/wallpaper"
 )
 
-type Args struct {
+type arguments struct {
 	setLast bool
 	path    string
 }
 
-type File struct {
+type file struct {
 	name    string
 	modTime time.Time
 }
 
-type FilesSlice []File
-
-func (s FilesSlice) Len() int {
-	return len(s)
-}
-
-func (s FilesSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s FilesSlice) Less(i, j int) bool {
-	return s[i].modTime.Before(s[j].modTime)
-}
+type filesSlice []file
 
 func main() {
 	args := parseArgs()
@@ -54,7 +42,7 @@ func main() {
 		return
 	}
 
-	i := getImgIndex(len(imgs), args.setLast)
+	i := imgIndex(len(imgs), args.setLast)
 	randImg := imgs[i].name
 
 	err = wallpaper.SetFromFile(args.path + randImg)
@@ -66,18 +54,30 @@ func main() {
 	}
 }
 
-func parseArgs() Args {
+func (s filesSlice) Len() int {
+	return len(s)
+}
+
+func (s filesSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s filesSlice) Less(i, j int) bool {
+	return s[i].modTime.Before(s[j].modTime)
+}
+
+func parseArgs() arguments {
 	useLastPtr := flag.Bool("l", false, "use last image instead of a random one")
 	flag.Parse()
 
-	return Args{
+	return arguments{
 		setLast: *useLastPtr,
-		path:    getImgsPath(),
+		path:    imgsPath(),
 	}
 }
 
-func getImgIndex(l int, shouldGetLastIndex bool) int {
-	if shouldGetLastIndex {
+func imgIndex(l int, getLastIndex bool) int {
+	if getLastIndex {
 		return l - 1
 	}
 
@@ -87,8 +87,8 @@ func getImgIndex(l int, shouldGetLastIndex bool) int {
 	return randWithSeed.Intn(l)
 }
 
-func getImgsPath() string {
-	wallsDir := getHomeDir() + "/Pictures/"
+func imgsPath() string {
+	wallsDir := homeDir() + "/Pictures/"
 
 	if args := flag.Args(); len(args) > 0 {
 		wallsDir = sanitizePath(args[0])
@@ -99,7 +99,7 @@ func getImgsPath() string {
 
 func sanitizePath(path string) string {
 	if strings.Contains(path, "~") {
-		path = strings.Replace(path, "~", getHomeDir(), 1)
+		path = strings.Replace(path, "~", homeDir(), 1)
 	}
 
 	if !strings.HasSuffix(path, "/") {
@@ -109,7 +109,7 @@ func sanitizePath(path string) string {
 	return path
 }
 
-func getHomeDir() string {
+func homeDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
@@ -117,17 +117,17 @@ func getHomeDir() string {
 	return usr.HomeDir
 }
 
-func readDir(path string) (FilesSlice, error) {
-	var imgs FilesSlice
+func readDir(path string) (filesSlice, error) {
+	var imgs filesSlice
 
 	files, err := ioutil.ReadDir(path)
 
 	if err != nil {
-		return FilesSlice{}, err
+		return filesSlice{}, err
 	}
 
-	for _, file := range files {
-		imgs = append(imgs, File{file.Name(), file.ModTime()})
+	for _, f := range files {
+		imgs = append(imgs, file{f.Name(), f.ModTime()})
 	}
 
 	sort.Sort(imgs)
