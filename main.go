@@ -15,8 +15,8 @@ import (
 )
 
 type arguments struct {
-	setLast bool
-	path    string
+	last bool
+	path string
 }
 
 type file struct {
@@ -42,15 +42,14 @@ func main() {
 		return
 	}
 
-	i := imgIndex(len(imgs), args.setLast)
-	randImg := imgs[i].name
+	img := nextWp(imgs, args.last)
 
-	err = wallpaper.SetFromFile(args.path + randImg)
+	err = wallpaper.SetFromFile(args.path + img)
 
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("Success!!! %s set as wallpaper.\n", randImg)
+		fmt.Printf("Success!!! %s set as wallpaper.\n", img)
 	}
 }
 
@@ -67,24 +66,46 @@ func (s filesSlice) Less(i, j int) bool {
 }
 
 func parseArgs() arguments {
-	useLastPtr := flag.Bool("l", false, "use last image instead of a random one")
+	last := flag.Bool("l", false, "use last image instead of a random one")
 	flag.Parse()
 
 	return arguments{
-		setLast: *useLastPtr,
-		path:    imgsPath(),
+		last: *last,
+		path: imgsPath(),
 	}
 }
 
-func imgIndex(l int, getLastIndex bool) int {
-	if getLastIndex {
-		return l - 1
+func currentWp() (string, error) {
+	current, err := wallpaper.Get()
+	if err != nil {
+		return "", err
+	}
+	s := strings.Split(current, "/")
+	return s[len(s)-1], nil
+}
+
+func nextWp(imgs filesSlice, getLast bool) string {
+	l := len(imgs)
+	cur, err := currentWp()
+	if err != nil {
+		fmt.Println("Could not get the current wallpaper =/")
+	}
+
+	if getLast {
+		last := imgs[l-1].name
+		if cur == last && l > 1 {
+			return imgs[l-2].name
+		}
+		return last
 	}
 
 	seed := rand.NewSource(time.Now().UnixNano())
-	randWithSeed := rand.New(seed)
+	i := rand.New(seed).Intn(l)
 
-	return randWithSeed.Intn(l)
+	for cur == imgs[i].name && l > 1 {
+		i = rand.New(seed).Intn(l)
+	}
+	return imgs[i].name
 }
 
 func imgsPath() string {
