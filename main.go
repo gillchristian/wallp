@@ -32,12 +32,12 @@ func main() {
 	imgs, err := readDir(args.path)
 
 	if err != nil {
-		fmt.Println(args.path + " does not exist or parmission is denied =/")
+		fmt.Printf("%s does not exist or parmission is denied =/\n", args.path)
 		return
 	}
 
 	if len(imgs) == 0 {
-		fmt.Println("No images found on: " + args.path)
+		fmt.Printf("No images found on: %s \n", args.path)
 		fmt.Println("¯\\_(ツ)_/¯")
 		return
 	}
