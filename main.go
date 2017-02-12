@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os/user"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -110,25 +111,17 @@ func nextWp(imgs filesSlice, getLast bool) string {
 }
 
 func imgsPath() string {
-	wallsDir := homeDir() + "/Pictures/"
+	dir := homeDir() + "/Pictures/"
 
 	if args := flag.Args(); len(args) > 0 {
-		wallsDir = sanitizePath(args[0])
+		dir = filepath.Clean(args[0])
 	}
 
-	return wallsDir
-}
-
-func sanitizePath(path string) string {
-	if strings.Contains(path, "~") {
-		path = strings.Replace(path, "~", homeDir(), 1)
+	if !strings.HasSuffix(dir, "/") {
+		dir += "/"
 	}
 
-	if !strings.HasSuffix(path, "/") {
-		path = path + "/"
-	}
-
-	return path
+	return dir
 }
 
 func homeDir() string {
