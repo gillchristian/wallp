@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os/user"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -138,6 +139,14 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
+func isImg(fn string) bool {
+	m, err := regexp.MatchString("(jpe?g|png|gif)$", fn)
+	if err != nil {
+		return false
+	}
+	return m
+}
+
 func readDir(path string) (filesSlice, error) {
 	var imgs filesSlice
 
@@ -148,7 +157,9 @@ func readDir(path string) (filesSlice, error) {
 	}
 
 	for _, f := range files {
-		imgs = append(imgs, file{f.Name(), f.ModTime()})
+		if !f.IsDir() && isImg(f.Name()) {
+			imgs = append(imgs, file{f.Name(), f.ModTime()})
+		}
 	}
 
 	sort.Sort(imgs)
